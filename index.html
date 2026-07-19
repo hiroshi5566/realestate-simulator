@@ -1063,10 +1063,10 @@ function judge(inp, sim, stress) {
   ];
 
   const items = [
-    { cat: '収益力（20点）', name: '表面利回り', val: fmtPct(sim.grossYield), std: `${req.pct}%で満点・${req.pct - 4}%で0点`, max: 10,
-      ...lin(sim.grossYield, reqY, reqY - 0.04) },
-    { cat: '収益力（20点）', name: '実質利回り（費用を引いた後）', val: fmtPct(sim.netYield), std: `${req.pct - 4}%で満点・${req.pct - 8}%で0点`, max: 10,
-      ...lin(sim.netYield, reqY - 0.04, reqY - 0.08) },
+    { cat: '収益力（20点）', name: '表面利回り', val: fmtPct(sim.grossYield), std: `${req.pct}%で満点・6%で0点`, max: 10,
+      ...lin(sim.grossYield, reqY, 0.06) },
+    { cat: '収益力（20点）', name: '実質利回り（費用を引いた後）', val: fmtPct(sim.netYield), std: `${req.pct - 4}%で満点・2%で0点`, max: 10,
+      ...lin(sim.netYield, reqY - 0.04, 0.02) },
     { cat: '投資効率（20点）', name: 'CCR（自己資金に対する年間CF・税引前）', val: sim.ccr !== null ? fmtPct(sim.ccr) : '—', std: '8%で満点・2%で0点', max: 10,
       ...lin(sim.ccr, 0.08, 0.02) },
     { cat: '投資効率（20点）', name: '自己資金の回収年数', val: sim.recover !== null ? sim.recover.toFixed(1) + '年' : '回収不能', std: '10年で満点・20年で0点', max: 10,
