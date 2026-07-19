@@ -651,13 +651,12 @@ html { scroll-behavior: smooth; scroll-padding-top: 70px; }
     <div class="metric" id="mStress">
       <div class="mlabel">最悪ケース耐性</div>
       <div class="mval" id="mStressVal">—</div>
-      <div class="msub">空室20%・金利+1%まで悪化しても黒字でいられる体力があるか</div>
+      <div class="msub">空室20%・金利+1%で再計算</div>
     </div>
   </div>
 
   <div class="card">
     <h2><svg viewBox="0 0 16 16"><path d="M2.8 4.6l1.3 1.3 2.2-2.4"/><path d="M2.8 10.1l1.3 1.3 2.2-2.4"/><path d="M9 5h4.5M9 10.5h4.5"/></svg>判定の内訳 — 何を見て判定しているか</h2>
-    <div style="font-size:12px;color:var(--text3);margin-bottom:6px">基準と安全チェック（チェック不合格でも判定は止めませんが、赤字リスクの警告です）</div>
     <div id="gateList"></div>
     <div class="score-head">
       <div style="font-size:12px;color:var(--text3)">スコア評価</div>
@@ -1241,11 +1240,7 @@ function renderJudgeDetail(v) {
   $('gateList').innerHTML =
     `<div class="gate-row"><span class="pill" style="background:rgba(56,189,248,0.12);color:#7dd3fc">基準</span>` +
     `<span class="gname">この物件の基準表面利回り：<b>${v.req.pct}%</b></span>` +
-    `<span class="gdetail">${escapeHtml(v.req.why)}</span></div>` +
-    v.checks.map(g =>
-      `<div class="gate-row"><span class="pill ${g.pass ? 'good' : 'bad'}">${g.pass ? '✓ 合格' : '⚠ 注意'}</span>` +
-      `<span class="gname">${g.name}</span><span class="gdetail">${g.detail}</span></div>`
-    ).join('');
+    `<span class="gdetail">${escapeHtml(v.req.why)}</span></div>`;
 
   $('scoreTotal').innerHTML = `${v.pct}%<span style="font-size:12px;color:var(--text3)">（${v.score} / ${v.maxScore}点）</span>`;
 
