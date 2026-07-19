@@ -270,6 +270,7 @@ html { scroll-behavior: smooth; scroll-padding-top: 70px; }
 }
 .dnav a:hover { color: var(--text); }
 .dnav a.active { color: var(--green); background: rgba(45, 212, 191, 0.10); border-color: rgba(45, 212, 191, 0.35); }
+.dnav .np { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; color: var(--green); margin-right: 7px; }
 .secband { display: flex; align-items: baseline; gap: 12px; margin: 30px 0 14px; }
 .secband .secnum { font-size: 12px; font-weight: 700; letter-spacing: 0.22em; color: var(--green); }
 .secband .sectitle { font-size: 16px; font-weight: 700; color: var(--text); }
@@ -283,7 +284,12 @@ html { scroll-behavior: smooth; scroll-padding-top: 70px; }
   }
   html, body { -webkit-print-color-adjust: exact; print-color-adjust: exact; background: #ffffff !important; color: var(--text); }
   body { font-size: 10px; }
-  .no-print, .chart-tip, .secband, details { display: none !important; }
+  .no-print, .chart-tip, details { display: none !important; }
+  .secband { margin: 0 0 8px; break-after: avoid-page; }
+  .secband .secnum { font-size: 9px; }
+  .secband .sectitle { font-size: 12px; }
+  .secband .secdesc { font-size: 8.5px; }
+  #anchor-cash, #anchor-long { break-before: page; }
   .wrap { max-width: none; padding: 0 0 6px; }
   header { margin-bottom: 8px; }
   header h1 { font-size: 18px; }
@@ -342,6 +348,8 @@ html { scroll-behavior: smooth; scroll-padding-top: 70px; }
   .legend { font-size: 8.5px; gap: 8px; margin-top: 3px; }
   .chips { display: none; }
   .exit-note, #annualNote { font-size: 8px; margin-top: 4px; }
+  footer { font-size: 7.5px; line-height: 1.5; margin-top: 8px; }
+  #sec-annual th, #sec-annual td { padding: 1.6px 6px; font-size: 9px; }
   .yr-dead td { background: #fdf6e3 !important; }
   .yr-sale td { background: #f3effc !important; }
 
@@ -363,8 +371,6 @@ html { scroll-behavior: smooth; scroll-padding-top: 70px; }
   svg text[fill="#a78bfa"] { fill: #6d28d9 !important; }
   .fade-future { fill: rgba(255, 255, 255, 0.65) !important; }
 
-  .pg2 { break-before: page; }
-  .pg3 { break-before: page; }
   .charts2 { break-inside: avoid; grid-template-columns: 1fr 1fr !important; gap: 8px; }
   #chart svg, #dcChart svg { min-width: 0 !important; }
 }
@@ -427,96 +433,7 @@ html { scroll-behavior: smooth; scroll-padding-top: 70px; }
 }
 
 @page { size: A4; margin: 9mm; }
-@media print {
-  :root {
-    --bg: #ffffff; --card: #ffffff; --card2: #f6f8fa;
-    --border: #d7dee6; --border2: #c2ccd6;
-    --text: #0f172a; --text2: #334155; --text3: #64748b;
-    --green: #0f766e; --red: #dc2626; --amber: #b45309; --purple: #7c3aed; --accent: #0369a1;
-  }
-  html, body { -webkit-print-color-adjust: exact; print-color-adjust: exact; background: #ffffff !important; color: var(--text); }
-  body { font-size: 11px; }
-  .card { background: #ffffff !important; box-shadow: none; }
-  .verdict.ok   { background: #f0fdfa !important; border-color: #99f6e4; }
-  .verdict.warn { background: #fffbeb !important; border-color: #fde68a; }
-  .verdict.ng   { background: #fef2f2 !important; border-color: #fecaca; }
-  .metric { background: #f6f8fa !important; }
-  .hint-box { background: #fffbeb !important; border-color: #f4d580; }
-  .pill.good { background: #ccfbf1; }
-  .pill.warn { background: #fef3c7; }
-  .pill.bad  { background: #fee2e2; }
-  .gauge-track { stroke: #e2e8f0 !important; }
-  .yr-dead td { background: #fdf6e3 !important; }
-  .yr-sale td { background: #f3effc !important; }
-  .chart-tip { display: none !important; }
-  svg line[stroke="#1c2530"] { stroke: #e2e8f0 !important; }
-  svg line[stroke="#3a4757"] { stroke: #94a3b8 !important; }
-  svg line[stroke="#97a6b8"] { stroke: #cbd5e1 !important; }
-  svg text[fill="#dbe4ee"] { fill: #334155 !important; }
-  svg text[fill="#fbbf24"] { fill: #b45309 !important; }
-  svg text[fill="#2dd4bf"] { fill: #0f766e !important; }
-  svg path[stroke="#2dd4bf"] { stroke: #0d9488 !important; }
-  svg path[stroke="#fb7185"] { stroke: #e11d48 !important; }
-  svg circle[fill="#2dd4bf"] { fill: #0d9488 !important; }
-  svg line[stroke="#a78bfa"] { stroke: #8b5cf6 !important; }
-  svg line[stroke="#fbbf24"] { stroke: #d97706 !important; }
-  svg circle[fill="#fbbf24"] { fill: #d97706 !important; }
-  svg rect[fill="#2dd4bf"] { fill: #0d9488 !important; }
-  svg rect[fill="#fb7185"] { fill: #e11d48 !important; }
-  svg circle[fill="#a78bfa"] { fill: #7c3aed !important; }
-  svg text[fill="#a78bfa"] { fill: #6d28d9 !important; }
-  .fade-future { fill: rgba(255, 255, 255, 0.65) !important; }
-  .no-print, .chart-tip { display: none !important; }
-  .wrap { max-width: none; padding: 0 0 8px; }
-  header { margin-bottom: 12px; }
-  header h1 { font-size: 20px; }
-  header p { font-size: 11px; margin-top: 2px; }
 
-  .grid { grid-template-columns: 280px 1fr; gap: 10px; align-items: start; }
-  .card { padding: 10px 14px; border-radius: 10px; box-shadow: none; break-inside: avoid; }
-  .card + .card { margin-top: 10px; }
-  .full, .charts2 { margin-top: 10px; }
-  .card h2 { font-size: 11px; margin-bottom: 8px; }
-
-  .verdict { padding: 12px 16px; margin-bottom: 10px; border-radius: 10px; }
-  .verdict .vmain { font-size: 20px; margin: 0 0 4px; }
-  .verdict .vwhy { font-size: 11px; }
-  .vgauge svg { width: 68px; height: 68px; }
-  .metrics { gap: 6px; margin-bottom: 10px; }
-  .metric { padding: 7px 10px; border-radius: 8px; }
-  .metric .mval { font-size: 14px; }
-  .metric .mlabel, .metric .msub { font-size: 9.5px; }
-
-  .field { margin-bottom: 6px; }
-  .field label, .srow label { font-size: 10px; }
-  input, select { padding: 3px 8px; font-size: 11px; }
-  .sliders { margin-top: 8px; padding-top: 8px; }
-  .srow { margin-bottom: 4px; }
-  .srow label { width: 74px; }
-  .srow output { width: 40px; font-size: 10px; }
-  .srow { gap: 6px; }
-  details { display: none; }
-
-  th, td { padding: 3px 7px; font-size: 10px; }
-  .tnote { font-size: 8.5px; }
-  .gate-row { padding: 4px 0; font-size: 10.5px; }
-  .score-head { margin: 8px 0 4px; }
-  .hint-box { padding: 7px 10px; font-size: 10px; margin-top: 8px; }
-  .cell-input { width: 60px !important; padding: 2px 5px !important; font-size: 10px !important; }
-  .cell-unit { font-size: 8.5px; }
-  .inline-ctl { margin-bottom: 8px; }
-  .inline-ctl .note { font-size: 9.5px; }
-  .legend { font-size: 9.5px; gap: 10px; margin-top: 4px; }
-  .chips { gap: 4px; margin-top: 6px; }
-  .chip { font-size: 9px; padding: 2px 7px; }
-  .exit-note, #annualNote { font-size: 9px; margin-top: 6px; }
-
-  .pg2 { break-before: page; }
-  .pg3 { break-before: page; }
-  .charts2 { break-inside: avoid; grid-template-columns: 1fr 1fr !important; gap: 10px; }
-  .chips { display: none; }
-  .metrics { grid-template-columns: repeat(4, 1fr); }
-}
 </style>
 </head>
 <body data-mtab="input">
@@ -532,9 +449,9 @@ html { scroll-behavior: smooth; scroll-padding-top: 70px; }
 </header>
 
 <nav class="dnav no-print">
-  <a href="#anchor-input">入力・判定</a>
-  <a href="#anchor-cash">収支・出口</a>
-  <a href="#anchor-long">グラフ・年次</a>
+  <a href="#anchor-input"><span class="np">SECTION 01</span>入力と判定</a>
+  <a href="#anchor-cash"><span class="np">SECTION 02</span>収支と出口</a>
+  <a href="#anchor-long"><span class="np">SECTION 03</span>長期シミュレーション</a>
 </nav>
 
 <div class="secband" id="anchor-input">
@@ -899,7 +816,7 @@ html { scroll-behavior: smooth; scroll-padding-top: 70px; }
   <button data-t="input" class="active" onclick="setMTab('input')">入力</button>
   <button data-t="judge" onclick="setMTab('judge')">判定</button>
   <button data-t="cash" onclick="setMTab('cash')">収支・出口</button>
-  <button data-t="long" onclick="setMTab('long')">グラフ・年次</button>
+  <button data-t="long" onclick="setMTab('long')">長期・年次</button>
 </nav>
 
 <div class="modal-overlay no-print" id="folderModal" style="display:none">
