@@ -157,6 +157,11 @@ input[type="range"] { flex: 1; accent-color: var(--green); height: 4px; min-widt
 .metric .mval { font-size: 20px; font-weight: 700; margin-top: 2px; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
 .mbar { height: 4px; background: rgba(255, 255, 255, 0.07); border-radius: 2px; margin: 7px 0 5px; overflow: hidden; }
 .mbar span { display: block; height: 100%; border-radius: 2px; }
+#catCards { grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 8px; }
+#catCards .metric { padding: 10px 11px; min-width: 0; }
+#catCards .mlabel { font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#catCards .mval { font-size: 15px; }
+#catCards .msub { font-size: 10px; line-height: 1.5; }
 .metric .msub { font-size: 11px; color: var(--text3); margin-top: 1px; }
 .metric.good .mval { color: var(--green); }
 .metric.warn .mval { color: var(--amber); }
