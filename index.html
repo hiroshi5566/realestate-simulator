@@ -439,7 +439,7 @@ html { scroll-behavior: smooth; scroll-padding-top: 70px; }
 </header>
 
 <nav class="dnav no-print">
-  <a href="#anchor-input" class="active">入力・判定</a>
+  <a href="#anchor-input">入力・判定</a>
   <a href="#anchor-cash">収支・出口</a>
   <a href="#anchor-long">グラフ・年次</a>
 </nav>
@@ -1844,7 +1844,7 @@ function updateDnav() {
   const y = window.scrollY + 130;
   let idx = 0;
   dnavAnchors.forEach((a, i) => { if (a && a.offsetTop <= y) idx = i; });
-  dnavLinks.forEach((l, i) => l.classList.toggle('active', i === idx));
+  dnavLinks.forEach((l, i) => l.classList.toggle('active', i === idx && idx !== 0));
 }
 window.addEventListener('scroll', () => requestAnimationFrame(updateDnav), { passive: true });
 
