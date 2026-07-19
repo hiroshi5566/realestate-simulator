@@ -657,10 +657,10 @@ html { scroll-behavior: smooth; scroll-padding-top: 70px; }
 
   <div class="card">
     <h2><svg viewBox="0 0 16 16"><path d="M2.8 4.6l1.3 1.3 2.2-2.4"/><path d="M2.8 10.1l1.3 1.3 2.2-2.4"/><path d="M9 5h4.5M9 10.5h4.5"/></svg>判定の内訳 — 何を見て判定しているか</h2>
-    <div style="font-size:12px;color:var(--text3);margin-bottom:6px">第1段階：必須条件（1つでも欠けたら見送り）</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:6px">基準と安全チェック（チェック不合格でも判定は止めませんが、赤字リスクの警告です）</div>
     <div id="gateList"></div>
     <div class="score-head">
-      <div style="font-size:12px;color:var(--text3)">第2段階：スコア評価</div>
+      <div style="font-size:12px;color:var(--text3)">スコア評価</div>
       <div class="total" id="scoreTotal">—</div>
     </div>
     <div style="font-size:11px;color:var(--text3);margin:-6px 0 8px">10項目×10点＝100点満点。各項目は満点基準と0点基準の間で比例配点。75%以上=買い候補／55%以上=条件次第</div>
@@ -1028,6 +1028,19 @@ const fmtManInt = v => Math.round(v / MAN).toLocaleString() + '万円';
 const fmtYen = v => Math.round(v).toLocaleString() + '円';
 const fmtPct = (v, d = 1) => (v * 100).toFixed(d) + '%';
 
+const METRO_PREFS = ['東京都', '神奈川県', '埼玉県', '千葉県'];
+function requiredYield(inp) {
+  if (!inp.area) return { pct: 10, why: '所在地未選択のため保守的に10%' };
+  const metro = METRO_PREFS.includes(inp.area.pref);
+  let r = metro ? 8 : 10;
+  const parts = [metro ? '1都3県ベース8%' : '地方ベース10%'];
+  if (inp.age >= 30) { r += 1; parts.push('築30年以上+1'); }
+  if (inp.area.i35 < 90) { r += 2; parts.push('人口減少エリア+2'); }
+  else if (inp.area.i35 < 95) { r += 1; parts.push('人口やや弱め+1'); }
+  r = Math.max(8, Math.min(10, r));
+  return { pct: r, why: parts.join('・') };
+}
+
 function lin(val, full, zero, higherBetter = true) {
   if (val === null || isNaN(val)) return { pts: 0, mark: 'bad' };
   let t = higherBetter ? (val - zero) / (full - zero) : (zero - val) / (zero - full);
@@ -1039,8 +1052,10 @@ function lin(val, full, zero, higherBetter = true) {
 function judge(inp, sim, stress) {
   const y1 = sim.y1;
   const stressVac = Math.round(Math.max(0.20, inp.vacancy) * 100);
+  const req = requiredYield(inp);
+  const reqY = req.pct / 100;
 
-  const gates = [
+  const checks = [
     { name: `自分の想定シナリオ（空室率${Math.round(inp.vacancy * 100)}%）で税引前の手残りがプラス`, pass: y1.ptcf > 0,
       detail: `月 ${fmtYen(y1.ptcf / 12)}` },
     { name: `空室への体力：空室が${stressVac}%まで悪化し、金利が1%上がっても赤字にならない`, pass: stress.y1.ptcf >= 0,
@@ -1048,10 +1063,10 @@ function judge(inp, sim, stress) {
   ];
 
   const items = [
-    { cat: '収益力（20点）', name: '表面利回り', val: fmtPct(sim.grossYield), std: '10%で満点・6%で0点', max: 10,
-      ...lin(sim.grossYield, 0.10, 0.06) },
-    { cat: '収益力（20点）', name: '実質利回り（費用を引いた後）', val: fmtPct(sim.netYield), std: '6%で満点・2%で0点', max: 10,
-      ...lin(sim.netYield, 0.06, 0.02) },
+    { cat: '収益力（20点）', name: '表面利回り', val: fmtPct(sim.grossYield), std: `${req.pct}%で満点・${req.pct - 4}%で0点`, max: 10,
+      ...lin(sim.grossYield, reqY, reqY - 0.04) },
+    { cat: '収益力（20点）', name: '実質利回り（費用を引いた後）', val: fmtPct(sim.netYield), std: `${req.pct - 4}%で満点・${req.pct - 8}%で0点`, max: 10,
+      ...lin(sim.netYield, reqY - 0.04, reqY - 0.08) },
     { cat: '投資効率（20点）', name: 'CCR（自己資金に対する年間CF・税引前）', val: sim.ccr !== null ? fmtPct(sim.ccr) : '—', std: '8%で満点・2%で0点', max: 10,
       ...lin(sim.ccr, 0.08, 0.02) },
     { cat: '投資効率（20点）', name: '自己資金の回収年数', val: sim.recover !== null ? sim.recover.toFixed(1) + '年' : '回収不能', std: '10年で満点・20年で0点', max: 10,
@@ -1075,28 +1090,29 @@ function judge(inp, sim, stress) {
   const maxScore = items.reduce((s, it) => s + it.max, 0);
   const pct = Math.round(score / maxScore * 100);
 
-  const failedGate = gates.find(g => !g.pass);
   let cls, label, why;
-  if (failedGate) {
-    cls = 'ng'; label = '✗ 見送り推奨';
-    why = `必須条件「${failedGate.name}」を満たしていません（${failedGate.detail}）。スコア以前の足切りです。下の内訳で詳細を確認してください。`;
-  } else if (pct >= 75) {
+  if (pct >= 75) {
     cls = 'ok'; label = '✓ 買い候補';
-    why = `必須条件2つをクリアし、スコア${pct}%（75%以上）。税引前の手残りは月 約${fmtManInt(y1.ptcf / 12)}、空室${fmtPct(sim.beVac, 0)}まで耐えられます。あとは現地確認と修繕リスクの試算を。`;
+    why = `スコア${pct}%（75%以上）。税引前の手残りは月 約${fmtManInt(y1.ptcf / 12)}、空室${fmtPct(sim.beVac, 0)}まで耐えられます。あとは現地確認と修繕リスクの試算を。`;
   } else if (pct >= 55) {
     cls = 'warn'; label = '△ 条件次第';
     const weak = items.filter(it => it.mark !== 'good').sort((a, b) => (b.max - b.pts) - (a.max - a.pts))[0];
-    why = `必須条件はクリアしましたが、スコア${pct}%（買い候補は75%以上）。特に「${weak.name}」（${weak.val}）が弱点です。下のヒントを確認してください。`;
+    why = `スコア${pct}%（買い候補は75%以上）。特に「${weak.name}」（${weak.val}）が弱点です。下のヒントを確認してください。`;
   } else {
     cls = 'ng'; label = '✗ 見送り推奨';
     why = `スコア${pct}%で基準（55%）に届きません。収益力・安全性が総合的に不足しています。`;
   }
+  if (!checks[0].pass) {
+    why += `　⚠ 想定空室率で毎月の手残りが赤字（月 ${fmtYen(y1.ptcf / 12)}）です。`;
+  } else if (!checks[1].pass) {
+    why += '　⚠ 最悪ケース（空室20%・金利+1%）では赤字に転落します。';
+  }
 
   const hints = [];
-  if (sim.grossYield < 0.10 && inp.rentFull > 0) {
-    const targetPrice = inp.rentFull * 12 / 0.10;
+  if (sim.grossYield < reqY && inp.rentFull > 0) {
+    const targetPrice = inp.rentFull * 12 / reqY;
     if (targetPrice < inp.price) {
-      hints.push(`物件価格が ${fmtManInt(targetPrice)} まで下がれば表面利回り10%に乗ります（${fmtManInt(inp.price - targetPrice)}の指値交渉）`);
+      hints.push(`物件価格が ${fmtManInt(targetPrice)} まで下がれば基準の表面利回り${req.pct}%に乗ります（${fmtManInt(inp.price - targetPrice)}の指値交渉）`);
     }
   }
   if (sim.dsr >= 0.45 && y1.rentEff > 0) {
@@ -1116,11 +1132,11 @@ function judge(inp, sim, stress) {
       hints.push(`${inp.area.city}の人口は年▲${cagrPct.toFixed(1)}%ペースで減る見込み。「家賃下落」スライダーは${sug}%以上で見るのが保守的です`);
     }
   }
-  if (failedGate && hints.length === 0) {
+  if (cls === 'ng' && hints.length === 0) {
     hints.push('この条件では価格・家賃・融資条件のどれかを大きく変えないと成立しません。指値の余地がないなら見送りが無難です');
   }
 
-  return { cls, label, why, gates, items, score, maxScore, pct, hints };
+  return { cls, label, why, checks, items, score, maxScore, pct, hints, req };
 }
 
 function render() {
@@ -1147,10 +1163,12 @@ function render() {
   }
 
   const gy = sim.grossYield;
+  const reqH = requiredYield(inp);
+  const reqHY = reqH.pct / 100;
   const gyHint = $('grossYieldHint');
-  gyHint.className = 'yield-hint ' + (gy >= 0.10 ? 'good' : gy >= 0.08 ? 'warn' : 'bad');
+  gyHint.className = 'yield-hint ' + (gy >= reqHY ? 'good' : gy >= reqHY - 0.02 ? 'warn' : 'bad');
   gyHint.innerHTML = '表面利回り <b>' + fmtPct(gy) + '</b>' +
-    (gy >= 0.10 ? '（基準の10%をクリア）' : gy >= 0.08 ? '（基準の10%まであと少し）' : '（基準の10%を下回る）');
+    (gy >= reqHY ? `（この物件の基準${reqH.pct}%をクリア）` : gy >= reqHY - 0.02 ? `（基準の${reqH.pct}%まであと少し）` : `（基準の${reqH.pct}%を下回る）`);
 
   const v = judge(inp, sim, stress);
   $('verdict').className = 'verdict ' + v.cls;
@@ -1220,10 +1238,14 @@ function setMetric(id, val, cls) {
 }
 
 function renderJudgeDetail(v) {
-  $('gateList').innerHTML = v.gates.map(g =>
-    `<div class="gate-row"><span class="pill ${g.pass ? 'good' : 'bad'}">${g.pass ? '✓ 合格' : '✗ 不合格'}</span>` +
-    `<span class="gname">${g.name}</span><span class="gdetail">${g.detail}</span></div>`
-  ).join('');
+  $('gateList').innerHTML =
+    `<div class="gate-row"><span class="pill" style="background:rgba(56,189,248,0.12);color:#7dd3fc">基準</span>` +
+    `<span class="gname">この物件の基準表面利回り：<b>${v.req.pct}%</b></span>` +
+    `<span class="gdetail">${escapeHtml(v.req.why)}</span></div>` +
+    v.checks.map(g =>
+      `<div class="gate-row"><span class="pill ${g.pass ? 'good' : 'bad'}">${g.pass ? '✓ 合格' : '⚠ 注意'}</span>` +
+      `<span class="gname">${g.name}</span><span class="gdetail">${g.detail}</span></div>`
+    ).join('');
 
   $('scoreTotal').innerHTML = `${v.pct}%<span style="font-size:12px;color:var(--text3)">（${v.score} / ${v.maxScore}点）</span>`;
 
