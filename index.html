@@ -255,9 +255,31 @@ td:first-child, th:first-child { text-align: left; }
 .inline-ctl .note { font-size: 12px; color: var(--text3); }
 .inline-ctl input { width: 90px; padding: 6px 10px; font-size: 13.5px; }
 footer { margin-top: 40px; font-size: 11px; color: var(--text3); line-height: 1.8; }
+html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+.dnav {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; gap: 8px; align-items: center;
+  margin: 0 -20px 20px; padding: 10px 20px;
+  background: rgba(10, 14, 19, 0.92); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+}
+.dnav a {
+  padding: 7px 16px; border-radius: 999px; text-decoration: none;
+  font-size: 13px; font-weight: 600; color: var(--text3);
+  border: 1px solid transparent; transition: color .15s;
+}
+.dnav a:hover { color: var(--text); }
+.dnav a.active { color: var(--green); background: rgba(45, 212, 191, 0.10); border-color: rgba(45, 212, 191, 0.35); }
+.secband { display: flex; align-items: baseline; gap: 12px; margin: 30px 0 14px; }
+.secband .secnum { font-size: 12px; font-weight: 700; letter-spacing: 0.22em; color: var(--green); }
+.secband .sectitle { font-size: 16px; font-weight: 700; color: var(--text); }
+.secband .secdesc { font-size: 12px; color: var(--text3); }
+@media print { .secband { display: none; } }
+
 .mnav { display: none; }
 .inline-ctl .brk { display: none; }
 @media (max-width: 640px) {
+  .dnav, .secband { display: none !important; }
   .inline-ctl .brk { display: block; flex-basis: 100%; height: 0; }
   .inline-ctl .ml-reset { margin-left: 0 !important; }
   #sec-exit h2 { flex-wrap: wrap; }
@@ -415,6 +437,18 @@ footer { margin-top: 40px; font-size: 11px; color: var(--text3); line-height: 1.
   </div>
   <button class="btn no-print" id="printBtn" style="flex-shrink:0; margin-top:24px;">PDFレポート出力</button>
 </header>
+
+<nav class="dnav no-print">
+  <a href="#anchor-input" class="active">入力・判定</a>
+  <a href="#anchor-cash">収支・出口</a>
+  <a href="#anchor-long">グラフ・年次</a>
+</nav>
+
+<div class="secband" id="anchor-input">
+  <span class="secnum">SECTION 01</span>
+  <span class="sectitle">入力と判定</span>
+  <span class="secdesc">条件を変えると、判定からグラフ・年次表まですべて即時に再計算されます</span>
+</div>
 
 <div class="grid">
 
@@ -627,6 +661,12 @@ footer { margin-top: 40px; font-size: 11px; color: var(--text3); line-height: 1.
 
 </div>
 
+<div class="secband" id="anchor-cash">
+  <span class="secnum">SECTION 02</span>
+  <span class="sectitle">毎月の収支と出口</span>
+  <span class="secdesc">足元のキャッシュフローと、売却まで含めた最終利益</span>
+</div>
+
 <div class="card full pg2" id="sec-cash">
   <h2><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.8"/><path d="M5.8 5.2 8 8l2.2-2.8M8 8v3M6.3 9.3h3.4"/></svg>毎月の収支（1年目）— どんな費用がかかるか</h2>
   <p style="font-size:12px;color:var(--text3);margin-bottom:10px">費用は「調整入力」欄でこの場で変更できます。空欄ならメモ欄のロジックで自動計算。変更すると判定・グラフ・年次表・出口シミュレーションまですべて連動します。</p>
@@ -711,6 +751,12 @@ footer { margin-top: 40px; font-size: 11px; color: var(--text3); line-height: 1.
     </div>
   </div>
   <p class="exit-note">最終利益 ＝ 保有中の手残り合計 ＋ 売却時の手残り − 投下した自己資金・諸費用。売却年・想定利回り・大規模修繕を変えると、ここも30年グラフも年次表もすべて連動して再計算されます（売却前の大規模修繕は保有中CF・IRR・最終利益を押し下げます）。</p>
+</div>
+
+<div class="secband" id="anchor-long">
+  <span class="secnum">SECTION 03</span>
+  <span class="sectitle">長期シミュレーション（30年）</span>
+  <span class="secdesc">累積手残り・残債・デッドクロスと年次の内訳</span>
 </div>
 
 <div class="charts2" id="sec-charts">
@@ -1791,6 +1837,16 @@ if (typeof POP_DATA !== 'undefined') {
     render();
   });
 }
+
+const dnavLinks = document.querySelectorAll('.dnav a');
+const dnavAnchors = ['anchor-input', 'anchor-cash', 'anchor-long'].map(id => document.getElementById(id));
+function updateDnav() {
+  const y = window.scrollY + 130;
+  let idx = 0;
+  dnavAnchors.forEach((a, i) => { if (a && a.offsetTop <= y) idx = i; });
+  dnavLinks.forEach((l, i) => l.classList.toggle('active', i === idx));
+}
+window.addEventListener('scroll', () => requestAnimationFrame(updateDnav), { passive: true });
 
 function setMTab(t) {
   document.body.dataset.mtab = t;
