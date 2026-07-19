@@ -632,29 +632,6 @@ html { scroll-behavior: smooth; scroll-padding-top: 70px; }
     </div>
   </div>
 
-  <div class="metrics">
-    <div class="metric" id="mCF">
-      <div class="mlabel">毎月の手残り（税引前）</div>
-      <div class="mval" id="mCFVal">—</div>
-      <div class="msub" id="mCFSub"></div>
-    </div>
-    <div class="metric" id="mRecover">
-      <div class="mlabel">自己資金の回収</div>
-      <div class="mval" id="mRecoverVal">—</div>
-      <div class="msub">投資したお金が戻る年数</div>
-    </div>
-    <div class="metric" id="mDSR">
-      <div class="mlabel">返済の重さ</div>
-      <div class="mval" id="mDSRVal">—</div>
-      <div class="msub" id="mDSRSub"></div>
-    </div>
-    <div class="metric" id="mStress">
-      <div class="mlabel">最悪ケース耐性</div>
-      <div class="mval" id="mStressVal">—</div>
-      <div class="msub">空室20%・金利+1%で再計算</div>
-    </div>
-  </div>
-
   <div class="card">
     <h2><svg viewBox="0 0 16 16"><path d="M2.8 4.6l1.3 1.3 2.2-2.4"/><path d="M2.8 10.1l1.3 1.3 2.2-2.4"/><path d="M9 5h4.5M9 10.5h4.5"/></svg>判定の内訳 — 何を見て判定しているか</h2>
     <div id="gateList"></div>
@@ -1177,21 +1154,6 @@ function render() {
   $('gaugeArc').style.strokeDashoffset = (GAUGE_C * (1 - v.pct / 100)).toFixed(1);
   $('gaugeText').textContent = v.pct;
   renderJudgeDetail(v);
-
-  const cfM = sim.y1.ptcf / 12;
-  setMetric('mCF', (cfM >= 0 ? '+' : '') + fmtMan(cfM), cfM > 30000 ? 'good' : cfM >= 0 ? 'warn' : 'bad');
-  $('mCFSub').textContent = '年間 ' + (sim.y1.ptcf >= 0 ? '+' : '') + fmtManInt(sim.y1.ptcf) + '（税引前）';
-
-  setMetric('mRecover', sim.recover ? sim.recover.toFixed(1) + '年' : '回収不能',
-            sim.recover === null ? 'bad' : sim.recover <= 10 ? 'good' : sim.recover <= 15 ? 'warn' : 'bad');
-
-  const dsrPct = sim.dsr * 100;
-  setMetric('mDSR', dsrPct < 45 ? '安全圏' : dsrPct <= 55 ? 'やや重い' : '危険水準',
-            dsrPct < 45 ? 'good' : dsrPct <= 55 ? 'warn' : 'bad');
-  $('mDSRSub').textContent = '家賃収入の' + dsrPct.toFixed(0) + '%が返済に消える';
-
-  setMetric('mStress', stress.y1.ptcf >= 0 ? '耐えられる' : '赤字転落',
-            stress.y1.ptcf >= 0 ? 'good' : 'bad');
 
   $('proChips').innerHTML = [
     ['表面利回り', fmtPct(sim.grossYield)],
