@@ -155,6 +155,8 @@ input[type="range"] { flex: 1; accent-color: var(--green); height: 4px; min-widt
 }
 .metric .mlabel { font-size: 11px; color: var(--text2); }
 .metric .mval { font-size: 20px; font-weight: 700; margin-top: 2px; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+.mbar { height: 4px; background: rgba(255, 255, 255, 0.07); border-radius: 2px; margin: 7px 0 5px; overflow: hidden; }
+.mbar span { display: block; height: 100%; border-radius: 2px; }
 .metric .msub { font-size: 11px; color: var(--text3); margin-top: 1px; }
 .metric.good .mval { color: var(--green); }
 .metric.warn .mval { color: var(--amber); }
@@ -632,6 +634,8 @@ html { scroll-behavior: smooth; scroll-padding-top: 70px; }
     </div>
   </div>
 
+  <div class="metrics" id="catCards"></div>
+
   <div class="card">
     <h2><svg viewBox="0 0 16 16"><path d="M2.8 4.6l1.3 1.3 2.2-2.4"/><path d="M2.8 10.1l1.3 1.3 2.2-2.4"/><path d="M9 5h4.5M9 10.5h4.5"/></svg>判定の内訳 — 何を見て判定しているか</h2>
     <div id="gateList"></div>
@@ -639,7 +643,7 @@ html { scroll-behavior: smooth; scroll-padding-top: 70px; }
       <div style="font-size:12px;color:var(--text3)">スコア評価</div>
       <div class="total" id="scoreTotal">—</div>
     </div>
-    <div style="font-size:11px;color:var(--text3);margin:-6px 0 8px">10項目×10点＝100点満点。各項目は満点基準と0点基準の間で比例配点。75%以上=買い候補／55%以上=条件次第</div>
+    <div style="font-size:11px;color:var(--text3);margin:-6px 0 8px">各項目0〜10点の比例配点。総合スコア＝獲得点÷満点の割合（所在地を選ぶと10項目100点満点・未選択は8項目80点満点）。75%以上=買い候補／55%以上=条件次第</div>
     <div class="tscroll"><table id="scoreTable"></table></div>
     <div class="hint-box" id="hintBox" style="display:none"></div>
   </div>
@@ -1154,6 +1158,7 @@ function render() {
   $('gaugeArc').style.strokeDashoffset = (GAUGE_C * (1 - v.pct / 100)).toFixed(1);
   $('gaugeText').textContent = v.pct;
   renderJudgeDetail(v);
+  renderCatCards(v);
 
   $('proChips').innerHTML = [
     ['表面利回り', fmtPct(sim.grossYield)],
@@ -1196,6 +1201,33 @@ function setMetric(id, val, cls) {
   const el = $(id);
   el.className = 'metric ' + cls;
   el.querySelector('.mval').textContent = val;
+}
+
+function renderCatCards(v) {
+  const groups = [];
+  v.items.forEach(it => {
+    const key = it.cat.split('（')[0];
+    let g = groups.find(x => x.key === key);
+    if (!g) { g = { key, pts: 0, max: 0, items: [] }; groups.push(g); }
+    g.pts += it.pts; g.max += it.max; g.items.push(it);
+  });
+  const POS = {
+    '収益力': '基準利回りを満たす収益力',
+    '投資効率': '自己資金の回収が速い',
+    '安全性': '空室・返済に余裕がある',
+    '出口': '売却まで含めて堅い',
+    'エリア・人口動態': '人口動態は安定',
+  };
+  $('catCards').innerHTML = groups.map(g => {
+    const ratio = g.max > 0 ? g.pts / g.max : 0;
+    const color = ratio >= 0.85 ? 'var(--green)' : ratio >= 0.5 ? 'var(--amber)' : 'var(--red)';
+    const weakest = [...g.items].sort((a, b) => a.pts / a.max - b.pts / b.max)[0];
+    const comment = ratio >= 0.9 ? (POS[g.key] || '良好') : `${weakest.name.split('（')[0]}が弱め（${weakest.val}）`;
+    return `<div class="metric"><div class="mlabel">${escapeHtml(g.key)}</div>` +
+      `<div class="mval" style="color:${color}">${g.pts}<span style="font-size:12px;color:var(--text3)"> / ${g.max}点</span></div>` +
+      `<div class="mbar"><span style="width:${Math.round(ratio * 100)}%;background:${color}"></span></div>` +
+      `<div class="msub">${escapeHtml(comment)}</div></div>`;
+  }).join('');
 }
 
 function renderJudgeDetail(v) {
