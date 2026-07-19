@@ -255,8 +255,24 @@ td:first-child, th:first-child { text-align: left; }
 .inline-ctl .note { font-size: 12px; color: var(--text3); }
 .inline-ctl input { width: 90px; padding: 6px 10px; font-size: 13.5px; }
 footer { margin-top: 40px; font-size: 11px; color: var(--text3); line-height: 1.8; }
+.mnav { display: none; }
 @media (max-width: 640px) {
-  .wrap { padding: 18px 12px 60px; }
+  .wrap { padding: 18px 12px 96px; }
+  .mnav {
+    display: flex; position: fixed; bottom: 0; left: 0; right: 0; z-index: 40;
+    background: rgba(10, 14, 19, 0.97); border-top: 1px solid var(--border2);
+    backdrop-filter: blur(8px);
+  }
+  .mnav button {
+    flex: 1; padding: 12px 4px calc(12px + env(safe-area-inset-bottom, 0px));
+    background: none; border: none; cursor: pointer;
+    color: var(--text3); font-size: 12px; font-weight: 700; font-family: inherit;
+  }
+  .mnav button.active { color: var(--green); }
+  body[data-mtab="input"] #sec-judge, body[data-mtab="input"] #sec-cash, body[data-mtab="input"] #sec-exit, body[data-mtab="input"] #sec-charts, body[data-mtab="input"] #sec-annual { display: none; }
+  body[data-mtab="judge"] #sec-input, body[data-mtab="judge"] #sec-cash, body[data-mtab="judge"] #sec-exit, body[data-mtab="judge"] #sec-charts, body[data-mtab="judge"] #sec-annual { display: none; }
+  body[data-mtab="cash"] #sec-input, body[data-mtab="cash"] #sec-judge, body[data-mtab="cash"] #sec-charts, body[data-mtab="cash"] #sec-annual { display: none; }
+  body[data-mtab="long"] #sec-input, body[data-mtab="long"] #sec-judge, body[data-mtab="long"] #sec-cash, body[data-mtab="long"] #sec-exit { display: none; }
   header { flex-wrap: wrap; }
   header h1 { font-size: 19px; }
   .eyebrow { font-size: 9.5px; letter-spacing: 0.18em; }
@@ -382,7 +398,7 @@ footer { margin-top: 40px; font-size: 11px; color: var(--text3); line-height: 1.
 }
 </style>
 </head>
-<body>
+<body data-mtab="input">
 <div class="wrap">
 
 <header style="display:flex; align-items:flex-start; justify-content:space-between; gap:16px;">
@@ -396,7 +412,7 @@ footer { margin-top: 40px; font-size: 11px; color: var(--text3); line-height: 1.
 
 <div class="grid">
 
-<div class="left-col">
+<div class="left-col" id="sec-input">
   <div class="card">
     <h2><svg viewBox="0 0 16 16"><path d="M2.5 8 8 3l5.5 5"/><path d="M4 7.5V13h8V7.5"/></svg>物件の情報を入れる</h2>
     <div class="field">
@@ -548,7 +564,7 @@ footer { margin-top: 40px; font-size: 11px; color: var(--text3); line-height: 1.
   </div>
 </div>
 
-<div>
+<div id="sec-judge">
   <div class="verdict ok" id="verdict">
     <div class="vbody">
       <div class="vlabel">総合判定</div>
@@ -605,7 +621,7 @@ footer { margin-top: 40px; font-size: 11px; color: var(--text3); line-height: 1.
 
 </div>
 
-<div class="card full pg2">
+<div class="card full pg2" id="sec-cash">
   <h2><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.8"/><path d="M5.8 5.2 8 8l2.2-2.8M8 8v3M6.3 9.3h3.4"/></svg>毎月の収支（1年目）— どんな費用がかかるか</h2>
   <p style="font-size:12px;color:var(--text3);margin-bottom:10px">費用は「調整入力」欄でこの場で変更できます。空欄ならメモ欄のロジックで自動計算。変更すると判定・グラフ・年次表・出口シミュレーションまですべて連動します。</p>
   <div class="tscroll">
@@ -644,7 +660,7 @@ footer { margin-top: 40px; font-size: 11px; color: var(--text3); line-height: 1.
   </div>
 </div>
 
-<div class="card full">
+<div class="card full" id="sec-exit">
   <h2><svg viewBox="0 0 16 16"><path d="M6.5 3H3v10h3.5"/><path d="M9.5 5.5 12 8l-2.5 2.5"/><path d="M12 8H6.5"/></svg>出口シミュレーション — <span id="saleTitle">—</span></h2>
   <div class="inline-ctl">
     <label>売却時の想定表面利回り（満室想定）</label>
@@ -689,7 +705,7 @@ footer { margin-top: 40px; font-size: 11px; color: var(--text3); line-height: 1.
   <p class="exit-note">最終利益 ＝ 保有中の手残り合計 ＋ 売却時の手残り − 投下した自己資金・諸費用。売却年・想定利回り・大規模修繕を変えると、ここも30年グラフも年次表もすべて連動して再計算されます（売却前の大規模修繕は保有中CF・IRR・最終利益を押し下げます）。</p>
 </div>
 
-<div class="charts2">
+<div class="charts2" id="sec-charts">
   <div class="card">
     <h2><svg viewBox="0 0 16 16"><path d="M2 13.5h12"/><path d="M3 11l3-4 3 2 4-5.5"/></svg>30年の見通し</h2>
     <div style="position:relative">
@@ -723,7 +739,7 @@ footer { margin-top: 40px; font-size: 11px; color: var(--text3); line-height: 1.
 
 
 
-<div class="card full pg3">
+<div class="card full pg3" id="sec-annual">
   <h2><svg viewBox="0 0 16 16"><rect x="2.5" y="3.5" width="11" height="10" rx="1.5"/><path d="M2.5 6.5h11M5.5 2v2.6M10.5 2v2.6"/></svg>年ごとのシミュレーション（30年）</h2>
   <p style="font-size:12px;color:var(--text3);margin-bottom:10px">大規模修繕・売却の年は「出口シミュレーション」で設定します（イベント列は表示のみ）。「デッドクロス」は自動判定です。</p>
   <div class="tscroll">
@@ -731,6 +747,13 @@ footer { margin-top: 40px; font-size: 11px; color: var(--text3); line-height: 1.
   </div>
   <p style="font-size:12px;color:var(--text3);margin-top:10px" id="annualNote">—</p>
 </div>
+
+<nav class="mnav no-print" id="mnav">
+  <button data-t="input" class="active" onclick="setMTab('input')">入力</button>
+  <button data-t="judge" onclick="setMTab('judge')">判定</button>
+  <button data-t="cash" onclick="setMTab('cash')">収支・出口</button>
+  <button data-t="long" onclick="setMTab('long')">グラフ・年次</button>
+</nav>
 
 <div class="modal-overlay no-print" id="folderModal" style="display:none">
   <div class="modal">
@@ -1759,6 +1782,12 @@ if (typeof POP_DATA !== 'undefined') {
     if (ps.value) for (const r of POP_DATA[ps.value]) cs.add(new Option(r[0], r[0]));
     render();
   });
+}
+
+function setMTab(t) {
+  document.body.dataset.mtab = t;
+  document.querySelectorAll('.mnav button').forEach(b => b.classList.toggle('active', b.dataset.t === t));
+  window.scrollTo({ top: 0 });
 }
 
 const chartEl = $('chart'), chartTip = $('chartTip');
