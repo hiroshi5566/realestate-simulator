@@ -256,7 +256,13 @@ td:first-child, th:first-child { text-align: left; }
 .inline-ctl input { width: 90px; padding: 6px 10px; font-size: 13.5px; }
 footer { margin-top: 40px; font-size: 11px; color: var(--text3); line-height: 1.8; }
 .mnav { display: none; }
+.inline-ctl .brk { display: none; }
 @media (max-width: 640px) {
+  .inline-ctl .brk { display: block; flex-basis: 100%; height: 0; }
+  .inline-ctl .ml-reset { margin-left: 0 !important; }
+  #sec-exit h2 { flex-wrap: wrap; }
+  #sec-exit h2 .h2dash { display: none; }
+  #sec-exit h2 .h2sub { flex-basis: 100%; padding-left: 25px; margin-top: 2px; }
   .wrap { padding: 18px 12px 96px; }
   .mnav {
     display: flex; position: fixed; bottom: 0; left: 0; right: 0; z-index: 40;
@@ -661,12 +667,13 @@ footer { margin-top: 40px; font-size: 11px; color: var(--text3); line-height: 1.
 </div>
 
 <div class="card full" id="sec-exit">
-  <h2><svg viewBox="0 0 16 16"><path d="M6.5 3H3v10h3.5"/><path d="M9.5 5.5 12 8l-2.5 2.5"/><path d="M12 8H6.5"/></svg>出口シミュレーション — <span id="saleTitle">—</span></h2>
+  <h2><svg viewBox="0 0 16 16"><path d="M6.5 3H3v10h3.5"/><path d="M9.5 5.5 12 8l-2.5 2.5"/><path d="M12 8H6.5"/></svg><span>出口シミュレーション</span><span class="h2dash">—</span><span id="saleTitle" class="h2sub">—</span></h2>
   <div class="inline-ctl">
     <label>売却時の想定表面利回り（満室想定）</label>
     <input type="number" id="exitYield" value="10" min="1" step="0.5">
     <span class="note">%</span>
-    <label style="margin-left:12px">売却する年</label>
+    <span class="brk"></span>
+    <label style="margin-left:12px" class="ml-reset">売却する年</label>
     <input type="number" id="saleYearBox" value="15" min="1" max="30">
     <span class="note">年目　／　年次表のイベント列・「もしも計算」のスライダーとも常に同期</span>
   </div>
@@ -674,7 +681,8 @@ footer { margin-top: 40px; font-size: 11px; color: var(--text3); line-height: 1.
     <label>大規模修繕</label>
     <input type="number" id="majorRepair" value="200" min="0">
     <span class="note">万円/回</span>
-    <label style="margin-left:12px">実施する年</label>
+    <span class="brk"></span>
+    <label style="margin-left:12px" class="ml-reset">実施する年</label>
     <input type="number" id="mrY1" value="10" min="1" max="30" placeholder="—" style="width:62px">
     <input type="number" id="mrY2" value="20" min="1" max="30" placeholder="—" style="width:62px">
     <input type="number" id="mrY3" value="30" min="1" max="30" placeholder="—" style="width:62px">
