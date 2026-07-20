@@ -762,7 +762,7 @@ html { scroll-behavior: smooth; scroll-padding-top: 70px; }
       <div class="chart-tip" id="chartTip"></div>
     </div>
     <div class="legend">
-      <span class="lg-cum">累積手残り（税引後）</span>
+      <span class="lg-cum">投資回収（累積CF−投下資金）</span>
       <span class="lg-debt">ローン残債</span>
       <span class="lg-sale">売却時の最終手残り</span>
       <span class="lg-note">※売却年より後は薄表示（保有継続の参考）</span>
@@ -1182,7 +1182,7 @@ function render() {
     : 'この物件では30年以内に発生しません';
   updateMonthly(sim, inp);
   if (document.activeElement !== $('saleYearBox')) $('saleYearBox').value = sim.sale.year;
-  $('annualNote').textContent = `＊累積手残り＝毎年の手残りCFの累計から、購入時に投下した自己資金・諸費用（${fmtManInt(sim.totalInvested)}）を差し引いた値。プラスに転じた年が投資回収の完了。出口シミュレーションの「保有中の手残り合計」は差し引く前のCF合計です。　税金＝（収入 − 運営費用 − ローン利息 − 減価償却）× 実効税率${Math.round(inp.taxRate * 100)}%（詳細設定で変更可・マイナスの年は0円。損益通算・青色申告控除は未考慮）。`;
+  $('annualNote').textContent = `＊投資回収＝毎年の手残りCFの累計 − 投下した自己資金・諸費用（${fmtManInt(sim.totalInvested)}）。マイナスの間は回収途中、0円に到達した年＝自己資金を全額回収、プラス側はそのまま儲け。出口シミュレーションの「保有中の手残り合計」は差し引く前のCF合計です。　税金＝（収入 − 運営費用 − ローン利息 − 減価償却）× 実効税率${Math.round(inp.taxRate * 100)}%（詳細設定で変更可・マイナスの年は0円。損益通算・青色申告控除は未考慮）。`;
   renderAnnual(sim, inp);
 
   const s = sim.sale;
@@ -1195,7 +1195,8 @@ function render() {
   $('s-net').style.color = s.net >= 0 ? 'var(--green)' : 'var(--red)';
   $('s-netSub').textContent = `売却価格 − 残債${fmtManInt(s.debt)} − 仲介手数料${fmtManInt(s.cost)}（法定上限3.3%＋6.6万円） − 譲渡税${fmtManInt(s.tax)}`;
   $('s-cf').textContent = (cfSum >= 0 ? '+' : '') + fmtManInt(cfSum);
-  $('s-cfSub').textContent = `${s.year}年分の税引後CFの合計（年平均 ${fmtManInt(cfSum / s.year)}）。年次表の累積手残りはここから投下資金${fmtManInt(sim.totalInvested)}を差し引いた値`;
+  const cumAtSale = sim.years[s.year - 1].cum;
+  $('s-cfSub').textContent = `${s.year}年分の税引後CFの合計（年平均 ${fmtManInt(cfSum / s.year)}）＝ 年次表の投資回収 ${(cumAtSale >= 0 ? '+' : '') + fmtManInt(cumAtSale)} ＋ 投下資金 ${fmtManInt(sim.totalInvested)}`;
   $('s-final').textContent = (finalGain >= 0 ? '+' : '') + fmtManInt(finalGain);
   $('s-final').style.color = finalGain >= 0 ? 'var(--green)' : 'var(--red)';
   $('s-irr').innerHTML = `${fmtManInt(cfSum)} ＋ ${fmtManInt(s.net)} − 自己資金等${fmtManInt(sim.totalInvested)}<br>` +
@@ -1441,7 +1442,7 @@ function updateMonthly(sim, inp) {
 }
 
 function renderAnnual(sim, inp) {
-  const head = ['年', 'イベント', '収入', '運営費用', '返済', '減価償却', '税金', '手残りCF', '累積手残り＊', 'ローン残債'];
+  const head = ['年', 'イベント', '収入', '運営費用', '返済', '減価償却', '税金', '手残りCF', '投資回収＊', 'ローン残債'];
   let html = '<tr>' + head.map((h, i) => `<th${i === 1 ? ' style="text-align:left"' : ''}>${h}</th>`).join('') + '</tr>';
   for (const r of sim.years) {
     const cls = [];
@@ -1899,7 +1900,7 @@ chartEl.addEventListener('mousemove', e => {
   const atcf = year === 0 ? null : g.years[year - 1].atcf;
   chartTip.style.display = 'block';
   chartTip.innerHTML = `<b>${year}年目</b><br>` +
-    `<span style="color:var(--green)">累積手残り ${(cum >= 0 ? '+' : '') + fmtManInt(cum)}</span><br>` +
+    `<span style="color:var(--green)">投資回収 ${(cum >= 0 ? '+' : '') + fmtManInt(cum)}</span><br>` +
     `<span style="color:var(--red)">残債 ${fmtManInt(debt)}</span>` +
     (atcf === null ? '' : `<br><span style="color:${atcf >= 0 ? 'var(--green)' : 'var(--red)'}">年次CF ${(atcf >= 0 ? '+' : '') + fmtManInt(atcf)}</span>`);
   const wrap = chartEl.parentElement.getBoundingClientRect();
